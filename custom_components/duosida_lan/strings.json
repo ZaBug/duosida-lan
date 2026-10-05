@@ -1,9 +1,35 @@
 {
   "config": {
     "step": {
-      "user": {
+      "pick": {
         "title": "Duosida wallbox",
+        "description": "These wallboxes answered on the local network. Pick one, or enter the IP address yourself. A static DHCP lease is recommended. Close the Duosida app first: the wallbox accepts very few local connections.",
+        "data": {
+          "host": "Wallbox"
+        }
+      },
+      "manual": {
+        "title": "Duosida wallbox: IP address",
         "description": "Enter the IP address of the wallbox. It must be on the same network as Home Assistant; a static DHCP lease is recommended. Close the Duosida app first: the wallbox accepts very few local connections.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "IP address of the wallbox, for example 192.168.1.50",
+          "port": "Local protocol port, 9988 by default"
+        }
+      },
+      "reconfigure_pick": {
+        "title": "Change the wallbox address",
+        "description": "Pick the new address of this wallbox, or enter it yourself. The integration reconnects afterwards; the wallbox may need about a minute before it accepts the new session.",
+        "data": {
+          "host": "Wallbox"
+        }
+      },
+      "reconfigure_manual": {
+        "title": "Change the wallbox address",
+        "description": "Enter the new IP address. It is checked over UDP (the running session is not disturbed); the integration then reconnects, which can take about a minute.",
         "data": {
           "host": "Host",
           "port": "Port"
@@ -15,10 +41,12 @@
       }
     },
     "error": {
-      "cannot_connect": "The wallbox did not answer on this address and port. It may also be busy for about a minute after another local connection closed; try again later."
+      "cannot_connect": "The wallbox did not answer on this address and port. It may also be busy for about a minute after another local connection closed; try again later.",
+      "wrong_device": "A different wallbox answered on this address (MAC address does not match)."
     },
     "abort": {
-      "already_configured": "This wallbox is already configured."
+      "already_configured": "This wallbox is already configured.",
+      "reconfigure_successful": "The wallbox address was updated."
     }
   },
   "options": {

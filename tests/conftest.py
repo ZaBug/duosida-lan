@@ -27,3 +27,4 @@ sys.modules.setdefault("duosida_lan_core", _pkg)
 
 protocol = importlib.import_module("duosida_lan_core.protocol")
 client = importlib.import_module("duosida_lan_core.client")
+discovery = importlib.import_module("duosida_lan_core.discovery")

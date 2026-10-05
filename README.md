@@ -35,11 +35,21 @@ current (6 → 10 A while charging took effect in under 30 s); remote stop
 1. HACS → Integrations → ⋮ → **Custom repositories** → add
    `https://github.com/ZaBug/duosida-lan`, category **Integration**.
 2. Install **Duosida LAN** and restart Home Assistant.
-3. Settings → Devices & services → **Add integration** → *Duosida LAN* →
-   enter the wallbox IP address (port `9988`).
+3. Settings → Devices & services → **Add integration** → *Duosida LAN*.
+   The integration searches the local network and lists the wallboxes that
+   answered (IP and MAC address). Pick yours, or choose *Enter the IP address
+   manually* (port `9988`) if it is on another subnet or VLAN.
 
 Give the wallbox a static DHCP lease. Close the Duosida app while adding the
 integration (see *Connection limits*).
+
+### Changing the address later
+
+If the wallbox gets a new IP address: Settings → Devices & services →
+Duosida LAN → ⋮ → **Reconfigure**. Pick the new address from the list or enter
+it. The new address is checked over UDP only (the running session is not
+disturbed), and the MAC address must match the configured wallbox. The
+integration then reconnects, which can take about a minute.
 
 ## Options
 
@@ -65,6 +75,10 @@ ev_solar_manager:
 (Entity ids depend on the device name; check yours under the device page.)
 
 ## How it works
+
+Discovery: the integration sends `smart_chargepile_search` to UDP `48899`
+(broadcast, or directly to one address); each wallbox answers with
+`ip,mac,type,firmware`. Discovery opens no TCP connection.
 
 The wallbox speaks **OCPP 1.6 encoded as Protobuf** over plain TCP. Every
 message is one OCPP message type plus the device id (field 100) and a message

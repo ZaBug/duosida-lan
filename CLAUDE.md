@@ -13,7 +13,7 @@ UI (IP + port), one persistent session per wallbox, push updates to entities.
 
 ```bash
 python -m venv .venv && .venv/Scripts/python -m pip install pytest pytest-asyncio   # Windows
-python -m pytest -q -p no:homeassistant tests/test_protocol.py tests/test_client.py   # no HA needed
+python -m pytest -q -p no:homeassistant tests/test_protocol.py tests/test_client.py tests/test_discovery.py   # no HA needed
 python -m pytest -q tests/test_init.py    # end-to-end in HA (Linux only, runs in CI)
 ```
 
@@ -26,9 +26,10 @@ python -m pytest -q tests/test_init.py    # end-to-end in HA (Linux only, runs i
 | File | Role |
 |---|---|
 | `protocol.py` | Pure: Protobuf primitives, frame splitter, message parsers and builders. No I/O, no HA imports |
+| `discovery.py` | UDP discovery (broadcast or unicast to 48899, answer `ip,mac,type,firmware`). No TCP, never takes a session slot. No HA imports |
 | `client.py` | `DuosidaClient`: persistent asyncio session, polling, commands, transaction handling. No HA imports |
 | `__init__.py` | Entry setup: client + push `DataUpdateCoordinator`, platforms, unload |
-| `config_flow.py` | User step (host, port, identity probe), options (poll interval) |
+| `config_flow.py` | User step: discovery list or manual IP, then a TCP identity probe. Reconfigure: new address validated over UDP only (MAC must match). Options: poll interval |
 | `entity.py` | Base entity: device info, availability = session connected |
 | `sensor.py`, `number.py`, `switch.py`, `button.py` | Thin entity wrappers around the client |
 

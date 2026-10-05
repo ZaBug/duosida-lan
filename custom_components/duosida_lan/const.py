@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Final
 
 DOMAIN: Final = "duosida_lan"
-INTEGRATION_VERSION: Final = "0.1.1"
+INTEGRATION_VERSION: Final = "0.2.0"
 MANUFACTURER: Final = "Duosida"
 
 CONF_POLL_INTERVAL: Final = "poll_interval"

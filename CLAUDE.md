@@ -13,8 +13,8 @@ UI (IP + port), one persistent session per wallbox, push updates to entities.
 
 ```bash
 python -m venv .venv && .venv/Scripts/python -m pip install pytest pytest-asyncio   # Windows
-python -m pytest -q                       # all tests
-python -m pytest -q tests/test_client.py  # client against a simulated wallbox
+python -m pytest -q -p no:homeassistant tests/test_protocol.py tests/test_client.py   # no HA needed
+python -m pytest -q tests/test_init.py    # end-to-end in HA (Linux only, runs in CI)
 ```
 
 `tests/test_protocol.py` and `tests/test_client.py` need no Home Assistant;

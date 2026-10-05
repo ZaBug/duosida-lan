@@ -19,6 +19,8 @@ from homeassistant.helpers import entity_registry as er  # noqa: E402
 
 from test_client import DEVICE_ID, FakeWallbox  # noqa: E402
 
+pytestmark = pytest.mark.enable_socket
+
 DOMAIN = "duosida_lan"
 
 

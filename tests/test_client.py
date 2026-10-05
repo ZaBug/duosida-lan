@@ -10,6 +10,8 @@ import pytest
 from conftest import client as c
 from conftest import protocol as p
 
+pytestmark = pytest.mark.enable_socket
+
 DEVICE_ID = "0000000000000000001"
 
 

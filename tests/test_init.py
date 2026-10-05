@@ -51,6 +51,14 @@ def _entity_id(hass: HomeAssistant, platform: str, key: str) -> str:
     return entity_id
 
 
+async def test_integration_is_discoverable(hass: HomeAssistant) -> None:
+    import custom_components
+    from homeassistant import loader
+
+    integrations = await loader.async_get_custom_components(hass)
+    assert DOMAIN in integrations, (list(custom_components.__path__), sorted(integrations))
+
+
 async def test_flow_setup_and_control(hass: HomeAssistant, wallbox: FakeWallbox) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["type"] is FlowResultType.FORM

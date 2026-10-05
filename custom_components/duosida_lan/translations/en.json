@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Duosida wallbox",
+        "description": "Enter the IP address of the wallbox. It must be on the same network as Home Assistant; a static DHCP lease is recommended. Close the Duosida app first: the wallbox accepts very few local connections.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "IP address of the wallbox, for example 192.168.1.50",
+          "port": "Local protocol port, 9988 by default"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "The wallbox did not answer on this address and port. It may also be busy for about a minute after another local connection closed; try again later."
+    },
+    "abort": {
+      "already_configured": "This wallbox is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Duosida LAN options",
+        "data": {
+          "poll_interval": "Poll interval (seconds)"
+        },
+        "data_description": {
+          "poll_interval": "How often status and meter values are requested. Saving reconnects the session, which can take about a minute."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "available": "Available",
+          "preparing": "Preparing",
+          "charging": "Charging",
+          "suspended_evse": "Suspended by wallbox",
+          "suspended_ev": "Suspended by vehicle",
+          "finishing": "Finishing",
+          "reserved": "Reserved",
+          "unavailable": "Unavailable",
+          "faulted": "Faulted"
+        }
+      },
+      "error": {
+        "name": "Error",
+        "state": {
+          "connector_lock_failure": "Connector lock failure",
+          "ev_communication_error": "EV communication error",
+          "ground_failure": "Ground failure",
+          "high_temperature": "High temperature",
+          "internal_error": "Internal error",
+          "local_list_conflict": "Local list conflict",
+          "no_error": "No error",
+          "other_error": "Other error",
+          "over_current_failure": "Overcurrent",
+          "power_meter_failure": "Power meter failure",
+          "power_switch_failure": "Power switch failure",
+          "reader_failure": "Reader failure",
+          "reset_failure": "Reset failure",
+          "under_voltage": "Undervoltage",
+          "over_voltage": "Overvoltage",
+          "weak_signal": "Weak signal"
+        }
+      },
+      "current": {
+        "name": "Current"
+      },
+      "voltage": {
+        "name": "Voltage"
+      },
+      "power": {
+        "name": "Power"
+      },
+      "session_energy": {
+        "name": "Session energy"
+      },
+      "energy_register": {
+        "name": "Energy since restart"
+      },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "max_current_setting": {
+        "name": "Max current setting"
+      },
+      "transaction_id": {
+        "name": "Transaction ID"
+      }
+    },
+    "number": {
+      "max_current": {
+        "name": "Max current"
+      }
+    },
+    "switch": {
+      "charging": {
+        "name": "Charging"
+      }
+    },
+    "button": {
+      "start_charging": {
+        "name": "Start charging"
+      },
+      "stop_charging": {
+        "name": "Stop charging"
+      },
+      "start_stop_charging": {
+        "name": "Start/stop charging"
+      },
+      "refresh": {
+        "name": "Refresh"
+      }
+    }
+  }
+}

@@ -22,6 +22,7 @@ to the wallbox on TCP port `9988`, the same local protocol the vendor app uses.
 | `sensor.*_temperature`, `_error`, `_max_current_setting` | Diagnostics |
 | `number.*_max_current` | Maximum charging current, 6 A up to the wallbox rating. Applied live, also while charging. The state is the value **read back** from the wallbox |
 | `switch.*_charging` | On while a session runs. Turn on = remote start, off = remote stop |
+| `switch.*_plug_and_charge` | Plug and charge (`VendorDirectWorkMode`): start as soon as a car is plugged in. State read back from the wallbox |
 | `button.*_start_charging`, `_stop_charging` | Explicit start / stop |
 | `button.*_start_stop_charging` | Toggle: stops a running session, otherwise starts one |
 | `button.*_refresh` | Request status, meter values and settings now |
@@ -119,6 +120,7 @@ not affected; cloud-based integrations keep working.
   stop fails with a clear error until then.
 * Settings are written to the wallbox flash and survive a power cycle. Avoid
   writing the current more often than needed.
+* Display brightness (`VendorLEDStrength`) is rejected over the local protocol on firmware V2.5 for every value, so it is not exposed.
 * Not tested: three-phase models, models other than Mode3@32A, RFID / non
   plug-and-charge setups.
 

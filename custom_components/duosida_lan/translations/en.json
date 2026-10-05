@@ -132,6 +132,9 @@
     "switch": {
       "charging": {
         "name": "Charging"
+      },
+      "plug_and_charge": {
+        "name": "Plug and charge"
       }
     },
     "button": {

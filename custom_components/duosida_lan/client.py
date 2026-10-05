@@ -169,6 +169,15 @@ class DuosidaClient:
         # Read the stored value back; the answer updates the state when it arrives.
         await self._send(lambda mid: p.build_pull_configuration(self._id(), mid))
 
+    async def set_direct_work_mode(self, enabled: bool) -> None:
+        """Plug and charge: start charging as soon as a car is plugged in."""
+        frame = await self._request(lambda mid: p.build_set_direct_work_mode(self._id(), mid, enabled))
+        status = p.parse_conf_status(frame.payload)
+        if status not in ("Accepted", "RebootRequired"):
+            raise DuosidaCommandError(f"wallbox answered {status} to plug and charge {enabled}")
+        self._update(direct_work_mode=enabled)
+        await self._send(lambda mid: p.build_pull_configuration(self._id(), mid))
+
     async def start_charging(self) -> None:
         frame = await self._request(lambda mid: p.build_remote_start(self._id(), mid))
         status = p.parse_conf_status(frame.payload)

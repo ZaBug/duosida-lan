@@ -25,6 +25,7 @@ HELLO = bytes.fromhex("a2030408001000a20603494f53a80600")
 VENDOR_DOMAIN = b"smartchargepile.x-cheng.com"
 REMOTE_ID_TAG = "XC_Remote_Tag"
 MAX_CURRENT_KEY = "VendorMaxWorkCurrent"
+DIRECT_WORK_MODE_KEY = "VendorDirectWorkMode"  # plug and charge, "1" / "0"
 
 # Outer oneof field numbers (OCPP message types).
 BOOT_NOTIFICATION_REQ = 4
@@ -440,11 +441,21 @@ def build_pull_configuration(client_id: str, message_id: int) -> bytes:
     return _outer(DATA_TRANSFER_REQ, inner, client_id, message_id)
 
 
+def build_change_configuration(client_id: str, message_id: int, key: str, value: str) -> bytes:
+    payload = field_bytes(1, key.encode()) + field_bytes(2, value.encode())
+    return _outer(CHANGE_CONFIGURATION_REQ, payload, client_id, message_id)
+
+
 def build_set_max_current(client_id: str, message_id: int, amps: int) -> bytes:
     if not 6 <= amps <= 32:
         raise ValueError("current must be between 6 and 32 A")
-    payload = field_bytes(1, MAX_CURRENT_KEY.encode()) + field_bytes(2, str(amps).encode())
-    return _outer(CHANGE_CONFIGURATION_REQ, payload, client_id, message_id)
+    return build_change_configuration(client_id, message_id, MAX_CURRENT_KEY, str(amps))
+
+
+def build_set_direct_work_mode(client_id: str, message_id: int, enabled: bool) -> bytes:
+    # Verified live: "0" / "1" accepted, read back in configuration field 10.
+    # (VendorLEDStrength is rejected locally for every value on firmware V2.5.)
+    return build_change_configuration(client_id, message_id, DIRECT_WORK_MODE_KEY, "1" if enabled else "0")
 
 
 def build_remote_start(client_id: str, message_id: int, id_tag: str = REMOTE_ID_TAG) -> bytes:

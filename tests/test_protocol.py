@@ -153,3 +153,10 @@ def test_zigzag_roundtrip() -> None:
         assert p.unzigzag(p.zigzag(value)) == value
     # Captured BootNotificationConf time used by other projects: 2025-11-17.
     assert p.unzigzag(3526800158) == 1763400079
+
+
+def test_set_direct_work_mode_bytes() -> None:
+    for enabled, value in ((True, b"1"), (False, b"0")):
+        fields = p.decode(p.parse_frame(p.build_set_direct_work_mode(DEVICE_ID, 1, enabled)).payload)
+        assert p.first(fields, 1) == b"VendorDirectWorkMode"
+        assert p.first(fields, 2) == value

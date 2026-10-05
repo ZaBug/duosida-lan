@@ -21,6 +21,7 @@ class FakeWallbox:
     def __init__(self) -> None:
         self.status = 0  # available
         self.max_current = 6.0
+        self.direct_work_mode = True
         self.transaction_id: int | None = None
         self.received: list[p.Frame] = []
         self.start_confs: list[int] = []
@@ -96,11 +97,18 @@ class FakeWallbox:
             elif requested == p.TRIGGER_METER_VALUES:
                 self._meter()
         elif kind == p.DATA_TRANSFER_REQ:
-            pulled = bytes([3 << 3 | 5]) + struct.pack("<f", self.max_current) + p.field_varint(10, 1)
+            pulled = bytes([3 << 3 | 5]) + struct.pack("<f", self.max_current) + p.field_varint(10, int(self.direct_work_mode))
             self._send(p.DATA_TRANSFER_CONF, p.field_bytes(15, pulled), mid)
         elif kind == p.CHANGE_CONFIGURATION_REQ:
-            value = p.as_text(p.first(p.decode(frame.payload), 2, 2))
-            self.max_current = float(value)
+            fields = p.decode(frame.payload)
+            key, value = p.as_text(p.first(fields, 1, 2)), p.as_text(p.first(fields, 2, 2))
+            if key == p.MAX_CURRENT_KEY:
+                self.max_current = float(value)
+            elif key == p.DIRECT_WORK_MODE_KEY:
+                self.direct_work_mode = value == "1"
+            else:
+                self._send(p.CHANGE_CONFIGURATION_CONF, p.field_varint(1, 1), mid)  # Rejected
+                return
             self._send(p.CHANGE_CONFIGURATION_CONF, b"", mid)
         elif kind == p.REMOTE_START_REQ:
             self._send(p.REMOTE_START_CONF, b"", mid)
@@ -230,5 +238,18 @@ async def test_reconnects_after_disconnect(wallbox: FakeWallbox, monkeypatch: py
         await _wait_for(lambda: not client.connected)
         await _wait_for(lambda: client.connected, timeout=5)
         assert wallbox.connections == 2
+    finally:
+        await client.stop()
+
+
+async def test_plug_and_charge_reads_back(wallbox: FakeWallbox) -> None:
+    client = await _connected_client(wallbox)
+    try:
+        await _wait_for(lambda: client.state.direct_work_mode is True)
+        await client.set_direct_work_mode(False)
+        assert wallbox.direct_work_mode is False
+        await _wait_for(lambda: client.state.direct_work_mode is False)
+        await client.set_direct_work_mode(True)
+        await _wait_for(lambda: client.state.direct_work_mode is True)
     finally:
         await client.stop()

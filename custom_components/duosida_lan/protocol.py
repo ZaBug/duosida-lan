@@ -463,9 +463,12 @@ def build_ack(kind: int, client_id: str, message_id: int) -> bytes:
 
 
 def build_start_transaction_conf(client_id: str, message_id: int, transaction_id: int) -> bytes:
-    # f1 idTagInfo is left empty: every field takes its default, so status is
-    # 0 (Accepted) whatever the field numbering inside IdTagInfo is.
-    payload = field_bytes(1, b"") + field_varint(2, transaction_id)
+    # f1 idTagInfo {f3 status = 0 Accepted}, f2 transactionId. Field order
+    # follows the OCPP schema, as in every message seen on the wire. The
+    # status is written explicitly: with an empty idTagInfo the wallbox kept
+    # resending StartTransactionReq every minute (live test, 2026-10-05).
+    id_tag_info = field_varint(3, 0)
+    payload = field_bytes(1, id_tag_info) + field_varint(2, transaction_id)
     return _outer(START_TRANSACTION_CONF, payload, client_id, message_id)
 
 

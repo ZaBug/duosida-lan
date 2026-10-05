@@ -7,7 +7,13 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+    OptionsFlowWithReload,
+)
 from homeassistant.const import CONF_HOST, CONF_MAC, CONF_PORT
 from homeassistant.core import callback
 
@@ -194,8 +200,8 @@ class DuosidaLanConfigFlow(ConfigFlow, domain=DOMAIN):
         return DuosidaLanOptionsFlow()
 
 
-class DuosidaLanOptionsFlow(OptionsFlow):
-    """Poll interval. Changing it reloads the entry (reconnects after ~1 min)."""
+class DuosidaLanOptionsFlow(OptionsFlowWithReload):
+    """Poll interval. Saving reloads the entry (reconnects after ~1 min)."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:

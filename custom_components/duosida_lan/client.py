@@ -320,11 +320,14 @@ class DuosidaClient:
             self._update(**changes)
         elif kind == p.START_TRANSACTION_REQ:
             start = p.parse_start_transaction(frame.payload)
+            resent = self._state.transaction_id is not None
             transaction_id = self._state.transaction_id or self._new_transaction_id()
             await self._reply(p.build_start_transaction_conf(self._id(), frame.message_id, transaction_id))
-            _LOGGER.info(
-                "Duosida %s: transaction %s started (idTag %s, meter %s Wh)",
-                self.host, transaction_id, start.id_tag, start.meter_start_wh,
+            _LOGGER.log(
+                logging.DEBUG if resent else logging.INFO,
+                "Duosida %s: transaction %s %s (idTag %s, meter %s Wh)",
+                self.host, transaction_id, "start resent" if resent else "started",
+                start.id_tag, start.meter_start_wh,
             )
             self._update(transaction_id=transaction_id)
         elif kind == p.STOP_TRANSACTION_REQ:

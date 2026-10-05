@@ -139,11 +139,12 @@ def test_set_max_current_range(amps: int) -> None:
         p.build_set_max_current(DEVICE_ID, 1, amps)
 
 
-def test_start_transaction_conf_has_empty_id_tag_info() -> None:
+def test_start_transaction_conf_accepts_explicitly() -> None:
     frame = p.parse_frame(p.build_start_transaction_conf(DEVICE_ID, 9, 1791191288))
     assert frame.kind == p.START_TRANSACTION_CONF
     fields = p.decode(frame.payload)
-    assert p.first(fields, 1) == b""
+    id_tag_info = p.decode(p.first(fields, 1))
+    assert id_tag_info == [(3, 0, 0)]  # status present and Accepted
     assert p.first(fields, 2) == 1791191288
 
 

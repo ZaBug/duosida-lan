@@ -1,7 +1,7 @@
 # Duosida LAN
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![HA Version](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue.svg)](https://www.home-assistant.io/)
+[![HA Version](https://img.shields.io/badge/Home%20Assistant-2025.8%2B-blue.svg)](https://www.home-assistant.io/)
 
 Local control of **Duosida EV wallboxes** from Home Assistant, over your own
 network. No cloud account, no polling of a vendor server: the integration talks

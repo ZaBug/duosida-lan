@@ -72,7 +72,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: DuosidaConfigEntry) -> b
         await client.stop()
 
     entry.async_on_unload(hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _on_hass_stop))
-    entry.async_on_unload(entry.add_update_listener(_async_reload_on_options))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -84,6 +83,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: DuosidaConfigEntry) -> 
         await entry.runtime_data.client.stop()
     return unloaded
 
-
-async def _async_reload_on_options(hass: HomeAssistant, entry: DuosidaConfigEntry) -> None:
-    await hass.config_entries.async_reload(entry.entry_id)

@@ -175,6 +175,7 @@ async def test_reconfigure_changes_host(hass: HomeAssistant, wallbox: FakeWallbo
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_HOST: "127.0.0.2"})
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
+    await hass.async_block_till_done()  # the reload runs in the background
     assert entry.data[CONF_HOST] == "127.0.0.2"
     assert wallbox.connections == connections_before
 

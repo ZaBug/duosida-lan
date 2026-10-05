@@ -33,16 +33,40 @@ current (6 → 10 A while charging took effect in under 30 s); remote stop
 
 ## Installation
 
-1. HACS → Integrations → ⋮ → **Custom repositories** → add
-   `https://github.com/ZaBug/duosida-lan`, category **Integration**.
-2. Install **Duosida LAN** and restart Home Assistant.
-3. Settings → Devices & services → **Add integration** → *Duosida LAN*.
-   The integration searches the local network and lists the wallboxes that
-   answered (IP and MAC address). Pick yours, or choose *Enter the IP address
-   manually* (port `9988`) if it is on another subnet or VLAN.
+### 1. Install from HACS
 
-Give the wallbox a static DHCP lease. Close the Duosida app while adding the
-integration (see *Connection limits*).
+1. In Home Assistant open **HACS** → ⋮ (top right) → **Custom repositories**.
+2. Add `https://github.com/ZaBug/duosida-lan` with type **Integration**.
+3. Search for **Duosida LAN** in HACS, open it and press **Download**.
+4. Restart Home Assistant (Settings → System → ⋮ → Restart).
+
+### 2. Add the wallbox
+
+Before you start: give the wallbox a static DHCP lease in your router, and
+close the Duosida app on your phone (the wallbox accepts very few local
+connections, see *Connection limits*).
+
+1. Settings → Devices & services → **Add integration** → search **Duosida LAN**.
+2. The integration searches the local network (UDP, no connection is opened).
+   Wallboxes that answered are listed with IP and MAC address; pick yours.
+   If none answered (for example the wallbox is on another subnet or VLAN),
+   choose *Enter the IP address manually* or you get the form below directly:
+
+   <img src="docs/images/add_manual.png" alt="Manual setup form" width="520">
+
+3. Press **Submit**. The integration reads the wallbox identity (model, serial,
+   firmware), creates the device and opens its persistent session.
+
+### 3. Use it
+
+The device page shows the controls, live measurements and diagnostics:
+
+<img src="docs/images/device.png" alt="Device page" width="780">
+
+The integration page lists the wallbox; the gear opens the options and ⋮ has
+**Reconfigure**:
+
+<img src="docs/images/integration.png" alt="Integration page" width="720">
 
 ### Changing the address later
 
@@ -52,7 +76,11 @@ it. The new address is checked over UDP only (the running session is not
 disturbed), and the MAC address must match the configured wallbox. The
 integration then reconnects, which can take about a minute.
 
+<img src="docs/images/reconfigure.png" alt="Reconfigure: pick the new address" width="520">
+
 ## Options
+
+<img src="docs/images/options.png" alt="Options" width="520">
 
 | Option | Default | Notes |
 |---|---|---|

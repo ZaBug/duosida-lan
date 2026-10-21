@@ -1,6 +1,6 @@
 # Duosida LAN
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![HA Version](https://img.shields.io/badge/Home%20Assistant-2025.8%2B-blue.svg)](https://www.home-assistant.io/)
 
 Local control of **Duosida EV wallboxes** from Home Assistant, over your own
@@ -35,18 +35,10 @@ current (6 → 10 A while charging took effect in under 30 s); remote stop
 
 ### 1. Install from HACS
 
-Duosida LAN is in the HACS default store.
-
-[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ZaBug&repository=duosida-lan&category=integration)
-
-1. In Home Assistant open **HACS** and search for **Duosida LAN**
-   (or use the button above).
-2. Open it and press **Download**.
-3. Restart Home Assistant (Settings → System → ⋮ → Restart).
-
-If the search finds nothing, HACS may still be using an old repository list:
-reload HACS, or add `https://github.com/ZaBug/duosida-lan` with type
-**Integration** under HACS → ⋮ (top right) → **Custom repositories**.
+1. In Home Assistant open **HACS** → ⋮ (top right) → **Custom repositories**.
+2. Add `https://github.com/ZaBug/duosida-lan` with type **Integration**.
+3. Search for **Duosida LAN** in HACS, open it and press **Download**.
+4. Restart Home Assistant (Settings → System → ⋮ → Restart).
 
 ### 2. Add the wallbox
 

@@ -1,0 +1,47 @@
+name: Compatibility report
+description: Tell us how the integration works with your wallbox model
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The integration is tested on one DUOSIDA Mode3@32A with firmware V2.5.
+        Reports from other Duosida / UCHEN models help everyone.
+  - type: input
+    id: model
+    attributes:
+      label: Wallbox model
+      description: Brand, model, phases and maximum current.
+      placeholder: DUOSIDA Mode3@32A, single phase
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Wallbox firmware
+      description: Shown on the device page in Home Assistant.
+      placeholder: V2.5
+    validations:
+      required: true
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version
+      placeholder: 0.3.1
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What works
+      options:
+        - label: Discovery finds the wallbox
+        - label: Status and measurements update
+        - label: Setting the charging current
+        - label: Remote start / stop
+        - label: Plug and charge switch
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything that does not work or behaves differently. Debug logs are welcome.

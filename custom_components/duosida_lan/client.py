@@ -8,6 +8,9 @@ Lessons from live tests that shape this client:
   until a power cycle.
 * Never send BootNotificationConf. Answering the BootNotification as a
   central system preceded that lock-out.
+* Close with a FIN, never a bare RST. After an HA restart the wallbox once
+  kept refusing new sessions for over two hours, as if the old one were
+  still open (see ``_close_session``).
 * While a local session is open, the wallbox sends transaction messages
   (StartTransaction / StopTransaction) to it and retries until they are
   confirmed. This client confirms them and assigns the transaction id, so
@@ -31,6 +34,7 @@ IDENTITY_TIMEOUT_S = 15.0
 COMMAND_TIMEOUT_S = 15.0
 CONFIG_POLL_INTERVAL_S = 60.0
 RECONNECT_DELAYS_S = (60.0, 120.0, 300.0)
+CLOSE_DRAIN_TIMEOUT_S = 2.0
 
 
 class DuosidaError(Exception):
@@ -76,6 +80,31 @@ class DuosidaState:
         return self.status in ("charging", "suspended_ev", "suspended_evse")
 
 
+async def _close_session(reader: asyncio.StreamReader | None, writer: asyncio.StreamWriter) -> None:
+    """Close a session so that the wallbox notices it.
+
+    A plain close() with unread bytes in the receive buffer makes the kernel
+    send a single RST instead of a FIN. On the wallbox's 802.11b link that RST
+    can get lost; the wallbox then keeps the dead session in its only slot and
+    closes every new connection. A FIN is retransmitted until acknowledged, so
+    half-close first and read until the wallbox closes its side as well.
+    """
+    try:
+        if writer.can_write_eof():
+            writer.write_eof()
+        if reader is not None:
+            async with asyncio.timeout(CLOSE_DRAIN_TIMEOUT_S):
+                while await reader.read(4096):
+                    pass
+    except (OSError, RuntimeError, TimeoutError):
+        pass
+    writer.close()
+    try:
+        await asyncio.wait_for(writer.wait_closed(), 5)
+    except (OSError, TimeoutError):
+        pass
+
+
 async def async_probe(host: str, port: int = p.DEFAULT_PORT) -> p.Identity:
     """Open a short session, read the identity and close. Used by the config flow."""
     reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), CONNECT_TIMEOUT_S)
@@ -94,11 +123,7 @@ async def async_probe(host: str, port: int = p.DEFAULT_PORT) -> p.Identity:
                     return p.parse_identity(frame.payload)
         raise DuosidaConnectionError("wallbox did not send its identity")
     finally:
-        writer.close()
-        try:
-            await asyncio.wait_for(writer.wait_closed(), 5)
-        except (OSError, TimeoutError):
-            pass
+        await _close_session(reader, writer)
 
 
 class DuosidaClient:
@@ -118,6 +143,7 @@ class DuosidaClient:
         self._on_update = on_update
         self._state = DuosidaState()
         self._runner: asyncio.Task[None] | None = None
+        self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
         self._device_id: str | None = None
         self._ready = asyncio.Event()
@@ -151,7 +177,10 @@ class DuosidaClient:
                 await runner
             except asyncio.CancelledError:
                 pass
+        connected = self._writer is not None
         await self._close()
+        if connected:
+            _LOGGER.info("Duosida %s: session closed", self.host)
 
     async def async_wait_ready(self, timeout: float) -> bool:
         try:
@@ -218,7 +247,7 @@ class DuosidaClient:
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(self.host, self.port), CONNECT_TIMEOUT_S
         )
-        self._writer = writer
+        self._reader, self._writer = reader, writer
         self._last_frame_at = time.monotonic()
         writer.write(p.HELLO)
         await writer.drain()
@@ -252,13 +281,10 @@ class DuosidaClient:
             if not future.done():
                 future.set_exception(DuosidaConnectionError("session closed"))
         self._pending.clear()
-        writer, self._writer = self._writer, None
+        reader, writer = self._reader, self._writer
+        self._reader = self._writer = None
         if writer is not None:
-            writer.close()
-            try:
-                await asyncio.wait_for(writer.wait_closed(), 5)
-            except (OSError, TimeoutError):
-                pass
+            await _close_session(reader, writer)
         if was_ready or self._state.connected:
             self._update(connected=False)
 

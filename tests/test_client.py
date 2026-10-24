@@ -26,6 +26,7 @@ class FakeWallbox:
         self.received: list[p.Frame] = []
         self.start_confs: list[int] = []
         self.connections = 0
+        self.closed_by_peer: str | None = None  # "eof" (FIN) or "reset" (RST)
         self.server: asyncio.base_events.Server | None = None
         self._own_id = 134256000
         self._writer: asyncio.StreamWriter | None = None
@@ -77,7 +78,11 @@ class FakeWallbox:
                 for raw in splitter.feed(chunk):
                     self._on_frame(p.parse_frame(raw))
                 await writer.drain()
-        except (ConnectionError, asyncio.CancelledError):
+            self.closed_by_peer = "eof"
+            writer.close()
+        except ConnectionError:
+            self.closed_by_peer = "reset"
+        except asyncio.CancelledError:
             pass
 
     def _on_frame(self, frame: p.Frame) -> None:
@@ -253,3 +258,20 @@ async def test_plug_and_charge_reads_back(wallbox: FakeWallbox) -> None:
         await _wait_for(lambda: client.state.direct_work_mode is True)
     finally:
         await client.stop()
+
+
+async def test_stop_closes_with_fin_despite_unread_data(wallbox: FakeWallbox) -> None:
+    client = await _connected_client(wallbox)
+    await _wait_for(lambda: client.state.status == "available")
+    runner = client._runner
+    runner.cancel()
+    await asyncio.gather(runner, return_exceptions=True)
+    client._runner = None
+    # Frames the client never reads: a plain close() would answer with a RST.
+    for _ in range(20):
+        wallbox._status()
+    await wallbox._writer.drain()
+    await asyncio.sleep(0.1)
+    await client.stop()
+    await _wait_for(lambda: wallbox.closed_by_peer is not None)
+    assert wallbox.closed_by_peer == "eof"
